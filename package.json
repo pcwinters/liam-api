@@ -1,0 +1,22 @@
+{
+  "name": "liam-api",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.0.0beta4",
+    "connect-assets": "2.1.x",
+    "express-partials": ">= 0.0.5",
+    "ejs": "*",
+    "stylus": "*",
+    "coffee-script": "*",
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.2",
+    "grunt-express": "~1.0.0-beta2"
+  },
+  "scripts": {
+    "start": "server.js"
+  },
+  "engines": {
+    "node": "0.10.11",
+    "npm": "1.1.x"
+  }
+}
