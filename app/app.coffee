@@ -4,6 +4,8 @@ http = require 'http'
 partials = require 'express-partials'
 app = express()
 
+MemoryStore = express.session.MemoryStore;
+
 # Boot setup
 require("#{__dirname}/../config/boot")(app)
 
@@ -20,6 +22,11 @@ app.configure ->
   app.use express.favicon()
   app.use express.logger('dev')
   app.use express.bodyParser()
+  app.use express.cookieParser()
+  app.use express.session
+    store: new MemoryStore()
+    secret: 'secret'
+    key: 'bla'
   app.use express.methodOverride()
   app.use partials()
   app.use require('connect-assets')(src: "#{__dirname}/assets")
