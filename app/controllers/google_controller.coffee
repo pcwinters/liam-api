@@ -1,15 +1,26 @@
-request = require 'request'
+_ = require 'underscore'
+Google = require '../../lib/google'
 
 module.exports = (app) ->
 	class app.GoogleController
 
+		# Get /auth/identity
+		@identity = (req, res) ->
+			app.google.factory req, (err, google) ->
+				if err? then return res.json null
+				google.identity (err, user) ->
+					if err? then throw err
+					res.json user
+
+
 		# GET /auth/google/callback
 		@authCallback = (req, res) ->
 			authResult = req.body
-			request.get {url: "https://www.googleapis.com/oauth2/v1/userinfo?access_token=#{authResult.access_token}", json:true}, (err, response, body) ->
-				if err? then return res.send err
-				console.log "user: #{body.email}"
-				user = body
+			google = new Google(authResult.access_token)
+			if err? then throw err
+			google.identity (err, user) ->
+				if err? then throw err
+				safeUser = _.clone user
 				user.gauth = authResult
 				req.session.user = user
-				res.send(body)
+				res.json(safeUser)

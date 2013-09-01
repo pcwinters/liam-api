@@ -34,10 +34,21 @@ module.exports = class ImapService
 
 		return path
 
+	total: (pathToBox, callback) =>
+		@status pathToBox, (err, status) =>
+			if err? then callback err
+			callback null, status.messages.total
+
+	status: (pathToBox, callback) =>
+		@imap.status pathToBox, (err, status) -> 
+			if err? then callback err
+			callback null, status
+
 	folders: (callback) =>
 		imap = @imap
 		imap.getSubscribedBoxes (err, boxes) =>
 			if err? then callback err
+			winston.debug "Folders", {boxes}
 			folders = [
 				{
 					name: 'inbox'
@@ -56,9 +67,8 @@ module.exports = class ImapService
 					path: @_findBoxWithFlag "\\Drafts", boxes
 				}
 			]
-			setStatus = (folder, callback) ->
-
-				imap.status folder.path, (err, status) -> 
+			setStatus = (folder, callback) =>
+				@status folder.path, (err, status) -> 
 					if err? then callback err
 					folder.status = status
 					callback()
@@ -157,25 +167,26 @@ module.exports = class ImapService
 	messages: (folderPath, callback) =>
 		bodies = 'HEADER.FIELDS (FROM TO SUBJECT DATE)'
 		imap = @imap
-		imap.openBox folderPath, (err, box) =>
-			if err? then callback err
+		@total folderPath, (err, total) =>
+				
+			imap.openBox folderPath, (err, box) =>
+				if err? then callback err
 
-			fetch = imap.seq.fetch '1:25',
-				bodies: bodies
-				struct: true
+				fetch = imap.seq.fetch "#{total-10}:#{total}",
+					bodies: bodies
 
-			messages = []
+				messages = []
 
-			fetch.on 'message', (msg, seqno) =>
-				winston.info 'Fetch:message', {msg, seqno}
-				@message msg, (err, message) ->
-					if err? then callback err
-					headerBody = message.bodies[0] # We only have one body so just get it
-					messages.push _.extend _.omit(message, 'bodies'), headerBody
+				fetch.on 'message', (msg, seqno) =>
+					winston.info 'Fetch:message', {msg, seqno}
+					@message msg, (err, message) ->
+						if err? then callback err
+						headerBody = message.bodies[0] # We only have one body so just get it
+						messages.push _.extend _.omit(message, 'bodies'), headerBody
 
-			fetch.once 'error', (err) ->
-				callback err
+				fetch.once 'error', (err) ->
+					callback err
 
-			fetch.once 'end', () ->
-				winston.info "Done fetching", {messages: messages.length}
-				callback null, messages
+				fetch.once 'end', () ->
+					winston.info "Done fetching", {messages: messages.length}
+					callback null, messages

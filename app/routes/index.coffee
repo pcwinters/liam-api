@@ -2,6 +2,8 @@ module.exports = (app) ->
   # Index
   app.get '/', app.ApplicationController.index
   app.post '/auth/google/callback', app.GoogleController.authCallback
+  app.get '/auth/identity', app.GoogleController.identity
+
   app.get '/mailbox', app.MailboxController.list
   app.get '/mailbox/:folder', app.MailboxController.messages
 

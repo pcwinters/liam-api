@@ -7,7 +7,7 @@ winston.remove winston.transports.Console
 winston.add winston.transports.Console,
   level: 'debug'
   colorize: true
-  json: false
+  json: true
   timestamp: false
 
 expressWinston = require 'express-winston'
@@ -45,8 +45,6 @@ app.configure ->
   app.use expressWinston.logger
     transports: [winston.loggers.get('express')]
   app.use app.router
-  app.use expressWinston.errorLogger
-    transports: [winston.loggers.get('express')]
 
 app.configure 'development', ->
   app.use express.errorHandler()
