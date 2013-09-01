@@ -2,6 +2,15 @@
 express = require 'express'
 http = require 'http'
 partials = require 'express-partials'
+winston = require 'winston'
+winston.remove winston.transports.Console
+winston.add winston.transports.Console,
+  level: 'debug'
+  colorize: true
+  json: false
+  timestamp: false
+
+expressWinston = require 'express-winston'
 app = express()
 
 MemoryStore = express.session.MemoryStore;
@@ -23,14 +32,21 @@ app.configure ->
   app.use express.logger('dev')
   app.use express.bodyParser()
   app.use express.cookieParser()
-  app.use express.session
-    store: new MemoryStore()
+  app.use express.cookieSession
     secret: 'secret'
-    key: 'bla'
+  # app.use express.session
+  #   store: new MemoryStore()
+  #   secret: 'secret'
+  #   key: 'bla'
   app.use express.methodOverride()
   app.use partials()
   app.use require('connect-assets')(src: "#{__dirname}/assets")
+
+  app.use expressWinston.logger
+    transports: [winston.loggers.get('express')]
   app.use app.router
+  app.use expressWinston.errorLogger
+    transports: [winston.loggers.get('express')]
 
 app.configure 'development', ->
   app.use express.errorHandler()

@@ -1,4 +1,5 @@
 fs = require 'fs'
+winston = require 'winston'
 
 # Recursively require a folder’s files
 exports.autoload = autoload = (dir, app) ->
@@ -11,6 +12,10 @@ exports.autoload = autoload = (dir, app) ->
       autoload path, app
     else
       require(path)?(app)
+
+exports.error = (err, callback) ->
+  winston.error err
+  callback err
 
 # Return last item of an array
 # ['a', 'b', 'c'].last() => 'c'
