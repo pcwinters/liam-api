@@ -12,7 +12,7 @@ module.exports = (app) ->
 		# GET /mailbox/:folder
 		@messages = (req, res) ->
 			app.imap.connect req, (err, imap) ->
-				if err? then throw err
+				if err? then app.error.general res, err
 				folderName = req.params.folder
 				imap.folders (err, folders) ->
 					if err? then throw err
@@ -27,7 +27,8 @@ module.exports = (app) ->
 		# GET /mailbox
 		@list = (req, res) ->
 			app.imap.connect req, (err, imap) ->
-				if err? then throw err
+				if err? then app.error.general res, err
 				imap.folders (err, folders) ->
+					if err? then app.error.general res, err
 					res.json folders
 					imap.end()

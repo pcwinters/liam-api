@@ -12,6 +12,8 @@ module.exports = (app) ->
 					if err? then throw err
 					res.json user
 
+		@token = (req, res) ->
+			res.json {gauth: req?.session?.user?.gauth}
 
 		# GET /auth/google/callback
 		@authCallback = (req, res) ->

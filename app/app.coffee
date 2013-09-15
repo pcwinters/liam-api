@@ -44,6 +44,7 @@ app.configure ->
 
   app.use expressWinston.logger
     transports: [winston.loggers.get('express')]
+  app.use app.googleTokenMiddleware
   app.use app.router
 
 app.configure 'development', ->
